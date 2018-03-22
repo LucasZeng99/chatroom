@@ -26,7 +26,6 @@ var io = io(server, { wsEngine: 'ws' }) // IMPORTANT: don't know why!!!
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-console.log(`server listening on port: ${port}`)
 
 app.get('/onlineusers', function(req, res, next) {
   res.send(io.sockets.adapter.rooms)
@@ -41,7 +40,6 @@ io.on('connection', socket => {
   })
 
   socket.on('disconnect', () => {
-    console.log('user ' + socket.id + ' disconnected')
     socket.broadcast.emit('user disconnected', socket.id)
   })
 })
