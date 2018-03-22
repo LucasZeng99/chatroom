@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <link rel="stylesheet" href="./stylesheets/style.css">
     <title>They chat!</title>
 </head>
 
 <body>
+    <h1 class="title">a chatroom | 聊天室</h1>
     <div id="app">
-        <h1>the index.js router works fine.</h1>
-        <h2>hello there, begin to chat!</h2>
         <div class="user-window">
+            <h2>Online users | 在綫</h2>
             <p v-for="user in activeUsers">{{user}}</p>
         </div>
         <div class="chat-window">
-            <h2>chat window</h2>
+            <h2>Chat window | 對話</h2>
             <ul class="chat-messages" v-if="messages.length">
-                <p v-for="msg in messages" :key="msg">
-                    > {{msg.user}} says: {{msg.body}}
-                </p>
+                <div v-for="msg in messages" :key="msg">
+                    <p v-if="msg.type == 'chat'">> <strong v-bind:style="{color: msg.color}">{{msg.user.slice(0,3)}}</strong>: {{msg.body}}</p>
+                    <p v-if="msg.type == 'info'">>>{{msg.body.slice(0,5)}}<strong v-bind:style="{color: msg.color}">{{msg.body.slice(5,8)}}</strong>{{msg.body.slice(8)}}</p>
+                </div>
             </ul>
         </div>
         <input type="text" v-model="text" v-on:keyup.enter="submit" placeholder="message">
@@ -43,37 +44,74 @@
                     "body": "",
                     "user": "",
                     "timestamp": "",
+                    "color": "",
                 },
                 text: "",
                 activeUsers: [],
                 messages: [],
+                color: '#ddd',
             }
         },
         created() {
+            this.color = '#'+(Math.random()*0xFFFFFF<<0).toString(); //generate random color
             socket.on('user connected', socketid => {
-                this.activeUsers.push(socketid)
+                axios.get('/onlineusers')
+                .then((res) => {
+                    for (let id in res.data) {
+                        if (!this.activeUsers.includes(id)) {
+                            this.activeUsers.push(id)
+                        }
+                    }
+                })
+                .catch((err) => {
+                })
             })
             socket.on('chat message', msg => {
                 this.messages.push(msg)
             })
-        },
-        methods: {
-            submit: function () {
-                this.message.type = "chat"
-                this.message.user = socket.id
-                this.message.body = this.text
-                this.message.timestamp = moment().calendar()
-                socket.emit('chat message', this.message)
-                this.text = ""
+            socket.on('user disconnected', socketid => {
+                this.removeUser(socketid)
+                this.pushMessage('admin', 'info', "user " + socketid + " just left.")
+                this.messages.push(this.message)
                 this.message = {
                     "type": "",
                     "body": "",
                     "user": "",
                     "timestamp": "",
+                    "color": "",
                 }
+            })
+        },
+        methods: {
+            pushMessage(user, type, body) {
+                this.message.color = this.color
+                this.message.user = user
+                this.message.type = type
+                this.message.body = body
+                this.message.timestamp = moment().calendar()
+            },
+            removeUser(socketid) {
+                for (let i in this.activeUsers) {
+                    if (this.activeUsers[i] == socketid) {
+                        this.activeUsers.splice(i,1)
+                    }
+                }
+            },
+            submit: function () {
+                this.pushMessage(socket.id, 'chat', this.text)
+                socket.emit('chat message', this.message)
+                this.message = {
+                    "type": "",
+                    "body": "",
+                    "user": "",
+                    "timestamp": "",
+                    "color": "",
+                }
+                this.text = ""
             }
         }
     })
 </script>
+
 
 </html>

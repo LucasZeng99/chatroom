@@ -6,3 +6,45 @@ body {
 a {
   color: #00B7FF;
 }
+
+#app {
+  font-family: 'Lato', 'Segoe UI', Tahoma, Verdana, sans-serif;
+  max-width: 900px;
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+  padding: 50px;
+}
+.user-window {
+  flex-grow: 1;
+  flex-basis: 200px;
+  min-width: 100px;
+  margin-top: 20px;
+  margin-right: 40px;
+  padding: 10px 20px;
+  border-left: 3px dashed salmon;
+  border-top: 3px dashed salmon;
+}
+
+.chat-window {
+  flex-grow: 2;
+  flex-basis: 500px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border-top: 3px dashed cornflowerblue;
+  border-left: 3px dashed cornflowerblue;
+  min-width: 200px;
+}
+input {
+  min-width: 50%;
+  margin: auto 0;
+  height: 35px;
+  position: fixed;
+  bottom: 20px;
+  padding: 3px 6px; 
+}
+
+h1 {
+  text-align: center;
+  margin: auto 0;
+}
